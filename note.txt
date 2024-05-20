@@ -1,0 +1,4 @@
+RabbitMQ runs in mutiple nodes as replica server
+
+to load balance connection, we use nginx
+2 things to setup, is erlang cookie and rabbitmq config file

@@ -1,0 +1,83 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:stable-alpine3.19
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 80:80
+      - 8080:8080
+  rabbitmq-1:
+    image: rabbitmq:3.12
+    container_name: rabbitmq-1
+    hostname: rabbitmq-1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5672:5672
+      - 15675:15672
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+    secrets:
+      - source: erlang-cookie
+        target: /var/lib/rabbitmq/.erlang.tmp.cookie
+    restart: always
+    command: >
+      bash -c "cp /var/lib/rabbitmq/.erlang.tmp.cookie /var/lib/rabbitmq/.erlang.cookie
+      && chmod 400 /var/lib/rabbitmq/.erlang.cookie
+      && rabbitmq-plugins enable rabbitmq_peer_discovery_k8s
+      && rabbitmq-plugins enable rabbitmq_management
+      && rabbitmq-server"
+  rabbitmq-2:
+    image: rabbitmq:3.12
+    container_name: rabbitmq-2 
+    hostname: rabbitmq-2 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5673:5672
+      - 15673:15672
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+    secrets:
+      - source: erlang-cookie
+        target: /var/lib/rabbitmq/.erlang.tmp.cookie
+    restart: always
+    depends_on:
+      - rabbitmq-1
+    command: >
+      bash -c "cp /var/lib/rabbitmq/.erlang.tmp.cookie /var/lib/rabbitmq/.erlang.cookie
+      && chmod 400 /var/lib/rabbitmq/.erlang.cookie
+      && rabbitmq-plugins enable rabbitmq_peer_discovery_k8s
+      && rabbitmq-plugins enable rabbitmq_management
+      && rabbitmq-server"
+  rabbitmq-3:
+    image: rabbitmq:3.12
+    container_name: rabbitmq-3 
+    hostname: rabbitmq-3 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5674:5672
+      - 15674:15672
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+    secrets:
+      - source: erlang-cookie
+        target: /var/lib/rabbitmq/.erlang.tmp.cookie
+    restart: always
+    depends_on:
+      - rabbitmq-1
+    command: >
+      bash -c "cp /var/lib/rabbitmq/.erlang.tmp.cookie /var/lib/rabbitmq/.erlang.cookie
+      && chmod 400 /var/lib/rabbitmq/.erlang.cookie
+      && rabbitmq-plugins enable rabbitmq_peer_discovery_k8s
+      && rabbitmq-plugins enable rabbitmq_management
+      && rabbitmq-server"
+secrets:
+  erlang-cookie:
+    file: ./.erlang.cookie

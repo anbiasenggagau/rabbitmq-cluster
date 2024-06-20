@@ -9,9 +9,9 @@ async function main() {
     await channel.bindQueue("email", "notification", "email")
     let i = 0
     setInterval(() => {
-        channel.publish("notification", "email", Buffer.from(`Ini Pesan ${i}`))
+        channel.publish("notification", "email", Buffer.from(`Ini Pesan Ke ${i}`))
+        console.log("send: Pesan Ke " + i)
         i++
-        console.log("send " + i)
     }, 100)
 }
 

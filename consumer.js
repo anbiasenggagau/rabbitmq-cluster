@@ -5,7 +5,6 @@ async function main() {
     const channel = await connection.createChannel()
 
     await channel.consume("email", message => {
-        console.log(message.fields.routingKey)
         console.log(message.content.toString())
     },
         {
